@@ -170,23 +170,8 @@ function App() {
       <div className="landing-page">
         <div className="config-card">
           <h1>Global Sky</h1>
-          <p>Explore the world using Cesium ion.</p>
+          <p>Explore the world in 3D.</p>
           
-          <div className="input-group">
-            <label>Cesium ion Token</label>
-            <input 
-              type="password" 
-              placeholder="Enter ion Token..." 
-              value={ionToken}
-              onChange={(e) => setIonToken(e.target.value)}
-            />
-            <small>
-              <a href="https://cesium.com/ion/tokens" target="_blank" rel="noreferrer">
-                Get a token from Cesium ion
-              </a>
-            </small>
-          </div>
-
           <div className="input-group">
             <label>Starting Location</label>
             <select 
