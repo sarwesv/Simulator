@@ -22,11 +22,13 @@ function App() {
   const [isStarted, setIsStarted] = useState(false);
   const [selectedAirport, setSelectedAirport] = useState(AIRPORTS[0]);
   const [selectedJet, setSelectedJet] = useState(JETS[0]);
+  const [status, setStatus] = useState('Idle');
   const cesiumContainerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<Cesium.Viewer | null>(null);
 
   const handleStart = () => {
     setIsStarted(true);
+    setStatus('Initializing...');
   };
 
   useEffect(() => {
@@ -37,12 +39,15 @@ function App() {
 
   const initCesium = async () => {
     try {
-      // 1. Set Token
+      setStatus('Connecting to Cesium ion...');
       Cesium.Ion.defaultAccessToken = ION_TOKEN;
 
-      // 2. Initialize Viewer with Terrain
+      setStatus('Loading World Terrain...');
+      const terrainProvider = await Cesium.createWorldTerrainAsync();
+
+      setStatus('Creating Viewer...');
       const viewer = new Cesium.Viewer(cesiumContainerRef.current!, {
-        terrain: Cesium.Terrain.fromWorldTerrain(),
+        terrainProvider: terrainProvider,
         baseLayerPicker: false,
         timeline: false,
         animation: false,
@@ -53,18 +58,19 @@ function App() {
         fullscreenButton: false,
         geocoder: false,
         homeButton: false,
+        shouldAnimate: true,
       });
       viewerRef.current = viewer;
 
-      // 3. Add OSM Buildings
+      setStatus('Loading 3D Buildings...');
       try {
         const buildings = await Cesium.createOsmBuildingsAsync();
         viewer.scene.primitives.add(buildings);
-      } catch (error) {
-        console.error('Error loading OSM Buildings:', error);
+      } catch (e) {
+        console.warn('Buildings failed to load', e);
       }
 
-      // 4. Add Aircraft
+      setStatus('Deploying Aircraft...');
       const position = Cesium.Cartesian3.fromDegrees(
         selectedAirport.lon,
         selectedAirport.lat,
@@ -84,7 +90,9 @@ function App() {
         },
       });
 
-      // 5. Flight State
+      setStatus('Ready');
+      
+      // Flight State
       const state = {
         thrust: 0,
         speed: 0,
@@ -99,7 +107,6 @@ function App() {
       window.onkeydown = (e) => { keys[e.code] = true; };
       window.onkeyup = (e) => { keys[e.code] = false; };
 
-      // 6. Simulation Loop
       viewer.scene.preUpdate.addEventListener(() => {
         // Update physics
         if (keys['ShiftLeft']) state.thrust = Math.min(state.thrust + 0.5, 100);
@@ -159,6 +166,7 @@ function App() {
 
     } catch (error) {
       console.error('Cesium init error:', error);
+      setStatus('Error: ' + (error instanceof Error ? error.message : String(error)));
     }
   };
 
@@ -199,6 +207,7 @@ function App() {
     <div className="simulation-container">
       <div ref={cesiumContainerRef} className="cesium-container" />
       <div className="hud">
+        <div className="hud-item">STATUS: <span>{status}</span></div>
         <div className="hud-item">ALT: <span id="alt-val">0</span> ft</div>
         <div className="hud-item">SPD: <span id="spd-val">0</span> kts</div>
       </div>
