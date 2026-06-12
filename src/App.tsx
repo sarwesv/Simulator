@@ -16,8 +16,9 @@ const JETS = [
   { name: 'Drone', url: 'https://raw.githubusercontent.com/CesiumGS/cesium/main/Apps/SampleData/models/CesiumDrone/CesiumDrone.glb' }
 ];
 
+const ION_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwMWE1NTJkOC03ZDY0LTQ2M2ItOWVkNi0yOGI4OTVmMjg3MmMiLCJpZCI6NDQzMjg4LCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3ODExOTQ0Mjd9.QzLRzlRgP9n8GfYKQiHJMLXIoCzK-qLHDR6SHuowZzk';
+
 function App() {
-  const [ionToken, setIonToken] = useState('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJqdGkiOiIwMWE1NTJkOC03ZDY0LTQ2M2ItOWVkNi0yOGI4OTVmMjg3MmMiLCJpZCI6NDQzMjg4LCJpc3MiOiJodHRwczovL2FwaS5jZXNpdW0uY29tIiwiYXVkIjoidW5kZWZpbmVkX2RlZmF1bHQiLCJpYXQiOjE3ODExOTQ0Mjd9.QzLRzlRgP9n8GfYKQiHJMLXIoCzK-qLHDR6SHuowZzk');
   const [isStarted, setIsStarted] = useState(false);
   const [selectedAirport, setSelectedAirport] = useState(AIRPORTS[0]);
   const [selectedJet, setSelectedJet] = useState(JETS[0]);
@@ -25,10 +26,6 @@ function App() {
   const viewerRef = useRef<Cesium.Viewer | null>(null);
 
   const handleStart = () => {
-    if (!ionToken) {
-      alert('Please enter your Cesium ion Access Token');
-      return;
-    }
     setIsStarted(true);
   };
 
@@ -41,7 +38,7 @@ function App() {
   const initCesium = async () => {
     try {
       // 1. Set Token
-      Cesium.Ion.defaultAccessToken = ionToken;
+      Cesium.Ion.defaultAccessToken = ION_TOKEN;
 
       // 2. Initialize Viewer with Terrain
       const viewer = new Cesium.Viewer(cesiumContainerRef.current!, {
